@@ -88,12 +88,12 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_cha
         printf("Destination Port: %d\n", ntohs(tcp->tcp_dport));
     
 
-        int tcp_hearder_len = (int)(tcp->tcp_offx2) * 4; // get the size of the tcp header (32bit)
+        int tcp_hearder_len = TH_OFF(tcp) * 4; // get the size of the tcp header, 1바이트 tcp_offx2에 실제 tcp header 크기가 저장된 상위 4bit를 가져와서 4를 곱해준다.
         // print message
         printf("         Message: ");
         // message length: IP packet length - IP header length - TCP header length
         for (int i=0; i<ntohs(ip->iph_len) - (ip_header_len + tcp_hearder_len); i++) {
-            printf("%c",packet[ip_header_len + tcp_hearder_len + i]);
+            printf("%c",packet[sizeof(struct ethheader)+ip_header_len + tcp_hearder_len + i]);
         }
         printf("\n");
     }
