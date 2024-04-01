@@ -60,7 +60,7 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_cha
     struct ethheader *eth = (struct ethheader *)packet; // ethernet header start point
 
     // Print MAC addresses
-    printf("\n     Source MAC: ");
+    printf("\n      Source MAC: ");
     for (int i=0; i<6; i++) {
         printf("%02x:", eth->ether_shost[i]);
     }
@@ -75,22 +75,22 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_cha
     if (ntohs(eth->ether_type) == 0x0800) { // 0x0800 is IP type
     struct ipheader * ip = (struct ipheader *)(packet + sizeof(struct ethheader)); // IP header start point
 
-    printf("           From: %s\n", inet_ntoa(ip->iph_sourceip));   
-    printf("             To: %s\n", inet_ntoa(ip->iph_destip));    
+    printf("            From: %s\n", inet_ntoa(ip->iph_sourceip));   
+    printf("              To: %s\n", inet_ntoa(ip->iph_destip));    
 
     int ip_header_len = ip->iph_ihl * 4; // get the size of the ip header (32bit)
 
     // only print TCP packets
     if(ip->iph_protocol == IPPROTO_TCP) {
-        printf("       Protocol: TCP\n");
+        printf("        Protocol: TCP\n");
         struct tcpheader *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + ip_header_len); // TCP header start point
-        printf("       Source Port: %d\n", ntohs(tcp->tcp_sport));
-        printf("       Destination Port: %d\n", ntohs(tcp->tcp_dport));
+        printf("     Source Port: %d\n", ntohs(tcp->tcp_sport));
+        printf("Destination Port: %d\n", ntohs(tcp->tcp_dport));
     
 
         int tcp_hearder_len = tcp->tcp_offx2 * 4; // get the size of the tcp header (32bit)
         // print message
-        printf("       Message: ");
+        printf("         Message: ");
         // message length: IP packet length - IP header length - TCP header length
         for (int i=0; i<ntohs(ip->iph_len) - (ip_header_len + tcp_hearder_len); i++) {
             printf("%c", packet[ip_header_len + tcp_hearder_len + i]);
@@ -109,7 +109,7 @@ int main()
     bpf_u_int32 net;
 
     // Step 1: Open live pcap session on NIC with name enp0s3
-    handle = pcap_open_live("enp0s3", BUFSIZ, 1, 1000, errbuf);
+    handle = pcap_open_live("enp0s8", BUFSIZ, 1, 1000, errbuf);
 
     // Step 2: Compile filter_exp into BPF psuedo-code
     pcap_compile(handle, &fp, filter_exp, 0, net);
