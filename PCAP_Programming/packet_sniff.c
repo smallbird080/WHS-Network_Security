@@ -55,17 +55,16 @@ struct tcpheader {
     u_short tcp_urp;                 /* urgent pointer */
 };
 
-void packet_analysis(u_char *args, const struct pcap_pkthdr *header,
-                              const u_char *packet)
+void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
     struct ethheader *eth = (struct ethheader *)packet; // ethernet header start point
 
     // Print MAC addresses
-    printf("Source MAC: ");
+    printf("\n     Source MAC: ");
     for (int i=0; i<6; i++) {
         printf("%02x:", eth->ether_shost[i]);
     }
-    printf("\nDestination MAC: ");  
+    printf("\n Destination MAC: ");  
     for (int i=0; i<6; i++) {
         printf("%02x:", eth->ether_dhost[i]);
     }
@@ -76,14 +75,14 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header,
     if (ntohs(eth->ether_type) == 0x0800) { // 0x0800 is IP type
     struct ipheader * ip = (struct ipheader *)(packet + sizeof(struct ethheader)); // IP header start point
 
-    printf("       From: %s\n", inet_ntoa(ip->iph_sourceip));   
-    printf("         To: %s\n", inet_ntoa(ip->iph_destip));    
+    printf("           From: %s\n", inet_ntoa(ip->iph_sourceip));   
+    printf("             To: %s\n", inet_ntoa(ip->iph_destip));    
 
     int ip_header_len = ip->iph_ihl * 4; // get the size of the ip header (32bit)
 
     // only print TCP packets
     if(ip->iph_protocol == IPPROTO_TCP) {
-        printf("   Protocol: TCP\n");
+        printf("       Protocol: TCP\n");
         struct tcpheader *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + ip_header_len); // TCP header start point
         printf("       Source Port: %d\n", ntohs(tcp->tcp_sport));
         printf("       Destination Port: %d\n", ntohs(tcp->tcp_dport));
