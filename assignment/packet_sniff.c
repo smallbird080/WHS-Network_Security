@@ -3,6 +3,35 @@
 #include <pcap.h>
 #include <arpa/inet.h>
 
+typedef unsigned short u_short;
+typedef unsigned short u_int16_t;
+typedef unsigned int u_int;
+typedef unsigned char u_char;
+typedef unsigned long u_long;
+
+/* Ethernet header */
+struct ethheader {
+    u_char  ether_dhost[6];    /* destination host address */
+    u_char  ether_shost[6];    /* source host address */
+    u_short ether_type;                     /* IP? ARP? RARP? etc */
+};
+
+/* IP Header */
+struct ipheader {
+  unsigned char      iph_ihl:4, //IP header length
+                     iph_ver:4; //IP version
+  unsigned char      iph_tos; //Type of service
+  unsigned short int iph_len; //IP Packet length (data + header)
+  unsigned short int iph_ident; //Identification
+  unsigned short int iph_flag:3, //Fragmentation flags
+                     iph_offset:13; //Flags offset
+  unsigned char      iph_ttl; //Time to Live
+  unsigned char      iph_protocol; //Protocol type
+  unsigned short int iph_chksum; //IP datagram checksum
+  struct  in_addr    iph_sourceip; //Source IP address
+  struct  in_addr    iph_destip;   //Destination IP address
+};
+
 /* TCP Header */
 struct tcpheader {
     u_short tcp_sport;               /* source port */
@@ -55,9 +84,9 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header,
     // only print TCP packets
     if(ip->iph_protocol == IPPROTO_TCP) {
         printf("   Protocol: TCP\n");
-        struct tcphaeder *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + ip_header_len); // TCP header start point
-        printf("       Source Port: %d\n", ntohs(tcp->tcph_srcport));
-        printf("       Destination Port: %d\n", ntohs(tcp->tcph_destport));
+        struct tcpheader *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + ip_header_len); // TCP header start point
+        printf("       Source Port: %d\n", ntohs(tcp->tcp_sport));
+        printf("       Destination Port: %d\n", ntohs(tcp->tcp_dport));
     
 
         int tcp_hearder_len = tcp->tcp_offx2 * 4; // get the size of the tcp header (32bit)
