@@ -58,6 +58,7 @@ struct tcpheader {
 void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
     struct ethheader *eth = (struct ethheader *)packet; // ethernet header start point
+    struct ipheader * ip = (struct ipheader *)(packet + sizeof(struct ethheader)); // IP header start point
     int ip_header_len = ip->iph_ihl * 4; // get the size of the ip header (32bit)
 
     switch(ip->iph_protocol) {                                 
@@ -75,7 +76,6 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_cha
 
                 // Print IP addresses
                 if (ntohs(eth->ether_type) == 0x0800) { // 0x0800 is IP type
-                struct ipheader * ip = (struct ipheader *)(packet + sizeof(struct ethheader)); // IP header start point
                 printf("            From: %s\n", inet_ntoa(ip->iph_sourceip));   
                 printf("              To: %s\n", inet_ntoa(ip->iph_destip));    
 
