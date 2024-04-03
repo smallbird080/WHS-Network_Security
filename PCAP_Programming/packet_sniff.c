@@ -58,30 +58,28 @@ struct tcpheader {
 void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
     struct ethheader *eth = (struct ethheader *)packet; // ethernet header start point
-
-    // Print MAC addresses
-    printf("\n      Source MAC: ");
-    for (int i=0; i<6; i++) {
-        printf("%02x:", eth->ether_shost[i]);
-    }
-    printf("\n Destination MAC: ");  
-    for (int i=0; i<6; i++) {
-        printf("%02x:", eth->ether_dhost[i]);
-    }
-    printf("\n");
-
-
-    // Print IP addresses
-    if (ntohs(eth->ether_type) == 0x0800) { // 0x0800 is IP type
-    struct ipheader * ip = (struct ipheader *)(packet + sizeof(struct ethheader)); // IP header start point
-
-    printf("            From: %s\n", inet_ntoa(ip->iph_sourceip));   
-    printf("              To: %s\n", inet_ntoa(ip->iph_destip));    
-
     int ip_header_len = ip->iph_ihl * 4; // get the size of the ip header (32bit)
 
     switch(ip->iph_protocol) {                                 
 			case IPPROTO_TCP:
+                // Print MAC addresses
+                printf("\n      Source MAC: ");
+                for (int i=0; i<6; i++) {
+                    printf("%02x:", eth->ether_shost[i]);
+                }
+                printf("\n Destination MAC: ");  
+                for (int i=0; i<6; i++) {
+                    printf("%02x:", eth->ether_dhost[i]);
+                }
+                printf("\n");
+
+                // Print IP addresses
+                if (ntohs(eth->ether_type) == 0x0800) { // 0x0800 is IP type
+                struct ipheader * ip = (struct ipheader *)(packet + sizeof(struct ethheader)); // IP header start point
+                printf("            From: %s\n", inet_ntoa(ip->iph_sourceip));   
+                printf("              To: %s\n", inet_ntoa(ip->iph_destip));    
+
+                // Print TCP information
 				printf("        Protocol: TCP\n");
                 struct tcpheader *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + ip_header_len); // TCP header start point
                 printf("     Source Port: %d\n", ntohs(tcp->tcp_sport));
@@ -94,8 +92,8 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_cha
                 printf("         Message: ");
                 u_char *data = (u_char *)(packet + sizeof(struct ethheader) + ip_header_len + tcp_hearder_len);
                 // message length: IP packet length - IP header length - TCP header length
-                for(int i=0; i<ntohs(ip->iph_len) - (ip_header_len + tcp_hearder_len); i++) {
-					printf("%c", data[i]);
+                for(int i=0; i<ntohs(ip->iph_len) - (ip_header_len + tcp_hearder_len) && i<64; i++) { // 64바이트까지만 출력
+					printf("%02x", data[i]);
 				}
 				printf("\n");
 				return;
@@ -121,7 +119,7 @@ int main()
     char filter_exp[] = "tcp";
     bpf_u_int32 net;
 
-    // Step 1: Open live pcap session on NIC with name enp0s3
+    // Step 1: Open live pcap session on NIC with name enp0s8, (ssh connection)
     handle = pcap_open_live("enp0s8", BUFSIZ, 1, 1000, errbuf);
 
     // Step 2: Compile filter_exp into BPF psuedo-code
