@@ -80,23 +80,36 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_cha
 
     int ip_header_len = ip->iph_ihl * 4; // get the size of the ip header (32bit)
 
-    // only print TCP packets
-    if(ip->iph_protocol == IPPROTO_TCP) {
-        printf("        Protocol: TCP\n");
-        struct tcpheader *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + ip_header_len); // TCP header start point
-        printf("     Source Port: %d\n", ntohs(tcp->tcp_sport));
-        printf("Destination Port: %d\n", ntohs(tcp->tcp_dport));
-    
+    switch(ip->iph_protocol) {                                 
+			case IPPROTO_TCP:
+				printf("        Protocol: TCP\n");
+                struct tcpheader *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + ip_header_len); // TCP header start point
+                printf("     Source Port: %d\n", ntohs(tcp->tcp_sport));
+                printf("Destination Port: %d\n", ntohs(tcp->tcp_dport));
 
-        int tcp_hearder_len = TH_OFF(tcp) * 4; // get the size of the tcp header, 1바이트 tcp_offx2에 실제 tcp header 크기가 저장된 상위 4bit를 가져와서 4를 곱해준다.
-        // print message
-        printf("         Message: ");
-        // message length: IP packet length - IP header length - TCP header length
-        for (int i=0; i<ntohs(ip->iph_len) - (ip_header_len + tcp_hearder_len); i++) {
-            printf("%c",packet[sizeof(struct ethheader)+ip_header_len + tcp_hearder_len + i]);
-        }
-        printf("\n");
-    }
+
+                int tcp_hearder_len = TH_OFF(tcp) * 4; // get the size of the tcp header, 1바이트 tcp_offx2에 실제 tcp header 크기가 저장된 상위 4bit를 가져와서 4를 곱해준다.
+
+                // print message
+                printf("         Message: ");
+                u_char *data = (u_char *)(packet + sizeof(struct ethheader) + ip_header_len + tcp_hearder_len);
+                // message length: IP packet length - IP header length - TCP header length
+                for(int i=0; i<ntohs(ip->iph_len) - (ip_header_len + tcp_hearder_len); i++) {
+					printf("%c", data[i]);
+				}
+				printf("\n");
+				return;
+			case IPPROTO_UDP:
+				printf("   Protocol: UDP\n");
+				return;
+			case IPPROTO_ICMP:
+				printf("   Protocol: ICMP\n");
+				return;
+			default:
+				printf("   Protocol: others\n");
+				return;
+		}
+    // only print TCP packets
   }
 }
 
