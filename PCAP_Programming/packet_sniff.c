@@ -59,7 +59,7 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_cha
 {
     struct ethheader *eth = (struct ethheader *)packet; // ethernet header start point
     struct ipheader * ip = (struct ipheader *)(packet + sizeof(struct ethheader)); // IP header start point
-    int ip_header_len = ip->iph_ihl * 4; // get the size of the ip header (32bit)
+    int ip_header_len = ip->iph_ihl * 4; // get the size of the ip header 
 
     switch(ip->iph_protocol) {                                 
 			case IPPROTO_TCP:
@@ -80,8 +80,8 @@ void packet_analysis(u_char *args, const struct pcap_pkthdr *header, const u_cha
                 printf("              To: %s\n", inet_ntoa(ip->iph_destip));    
 
                 // Print TCP information
-				printf("        Protocol: TCP\n");
                 struct tcpheader *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + ip_header_len); // TCP header start point
+				printf("        Protocol: TCP\n");
                 printf("     Source Port: %d\n", ntohs(tcp->tcp_sport));
                 printf("Destination Port: %d\n", ntohs(tcp->tcp_dport));
 
